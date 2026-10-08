@@ -1,0 +1,4 @@
+interface:
+  display_name: "한국어 코드 설명 주석"
+  short_description: "초보자를 위해 함수와 로직을 한국어로 설명하고 어려운 문법에 주석 추가"
+  default_prompt: "$korean-code-comments를 사용해 지정한 파일에 한국어 설명 주석을 추가해줘. 함수와 로직 단위로 설명하고 어려운 문법을 풀어줘."
