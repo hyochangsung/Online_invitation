@@ -50,6 +50,10 @@
 
   --color-preview-neutral-800: #5e5e5e;
 
+  /* InvitationCover 배경 그라데이션 (Figma color/cover-gradient/preserved-3, -4) */
+  --color-cover-gradient-start: #050510;
+  --color-cover-gradient-end: #656f79;
+
   /*
    * 간격: 기본 단위를 1px로 바꿔 Figma 숫자를 그대로 쓴다.
    * 예: p-16 = 16px, gap-24 = 24px (w-*, h-* 등 숫자 클래스도 px 기준)
@@ -85,6 +89,7 @@
   --radius-button: 6px;
   --radius-control: 8px;
   --radius-media: 12px;
+  --radius-scaled-media: 16.8px; /* Image type=flag (Figma radius/scaled-media) */
   --radius-card: 20px;
   --radius-cover: 32px;
   --radius-pill: 999px;
