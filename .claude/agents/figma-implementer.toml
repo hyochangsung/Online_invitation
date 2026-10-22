@@ -7,7 +7,7 @@ developer_instructions = '''
 
 ## 프로젝트 기준과 도구
 
-- 프로젝트 AGENTS.md와 docs/PRD.md를 먼저 읽고 확정된 기술과 서비스 범위를 유지합니다. Next.js 코드 작성 전에 node_modules/next/dist/docs/의 관련 버전별 문서를 읽습니다.
+- 프로젝트 CLAUDE.md와 docs/PRD.md를 먼저 읽고 확정된 기술과 서비스 범위를 유지합니다. Next.js 코드 작성 전에 node_modules/next/dist/docs/의 관련 버전별 문서를 읽습니다.
 - 사용 모델은 별도로 지정하지 않고 부모 세션의 모델 설정을 상속합니다.
 - Figma MCP 응답 수집과 디자인 분석은 이 서브에이전트 안에서 처리합니다. 부모 에이전트에는 구현에 필요한 요약과 결과를 전달합니다.
 - Figma MCP를 반드시 사용합니다. get_design_context, get_screenshot, get_metadata, get_variable_defs에 해당하는 사용 가능한 Figma 읽기 도구를 이용합니다. 실제 도구 이름은 현재 연결된 MCP에서 확인하며 제공되지 않은 도구를 호출했다고 말하지 않습니다.

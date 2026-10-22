@@ -7,7 +7,7 @@
 - 작고 이해하기 쉬운 단위로 구현한다. 불필요한 추상화나 복잡한 구조를 도입하지 않는다.
 - 모르거나 애매한 요구사항은 추측하지 말고 사용자에게 질문한다. 답변이 필요한 작업은 보류하되, 답변과 무관한 작업은 진행할 수 있다.
 - 작업 완료 시 무엇을 바꿨는지, 어떻게 확인했는지, 남은 미정 사항을 간단히 전달한다.
-- 사용자가 코드 파일에 한국어 설명 주석을 요청하면 프로젝트 전용 스킬 `.codex/skills/korean-code-comments/SKILL.md`를 읽고 적용한다. 함수·로직 단위로 설명하고 어려운 문법에 추가 설명을 단다.
+- 사용자가 코드 파일에 한국어 설명 주석을 요청하면 프로젝트 전용 스킬 `.claude/skills/korean-code-comments/SKILL.md`를 읽고 적용한다. 함수·로직 단위로 설명하고 어려운 문법에 추가 설명을 단다.
 
 ## 2. 기술스택(변경금지)
 
@@ -44,8 +44,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## 3. 디자인 규칙
 
-- “토큰 확인”, “토큰 동기화”, “check tokens”, “sync tokens”, “토큰 비교” 요청이 들어오면 `.codex/agents/token-checker.toml`의 `token-checker` 서브에이전트에 위임한다. Figma 변수 응답 수집과 비교는 해당 서브에이전트에서 처리하며, 기본은 분석·보고이고 수정은 사용자 승인 또는 명시적인 자동 수정 요청이 있을 때만 수행한다.
-- Figma URL과 함께 코드 구현을 요청하거나 “Figma 구현”, “디자인 구현”, “implement design”, “implement figma” 요청이 들어오면 `.codex/agents/figma-implementer.toml`의 `figma-implementer` 서브에이전트에 위임한다. Figma MCP 응답 수집과 디자인 분석은 해당 서브에이전트에서 처리한다.
+- “토큰 확인”, “토큰 동기화”, “check tokens”, “sync tokens”, “토큰 비교” 요청이 들어오면 `.claude/agents/token-checker.toml`의 `token-checker` 서브에이전트에 위임한다. Figma 변수 응답 수집과 비교는 해당 서브에이전트에서 처리하며, 기본은 분석·보고이고 수정은 사용자 승인 또는 명시적인 자동 수정 요청이 있을 때만 수행한다.
+- Figma URL과 함께 코드 구현을 요청하거나 “Figma 구현”, “디자인 구현”, “implement design”, “implement figma” 요청이 들어오면 `.claude/agents/figma-implementer.toml`의 `figma-implementer` 서브에이전트에 위임한다. Figma MCP 응답 수집과 디자인 분석은 해당 서브에이전트에서 처리한다.
 - 최종 디자인은 추후 사용자가 제공하는 Figma 디자인을 Figma MCP로 확인해 구현한다.
 - Figma 파일이나 화면이 제공되기 전에는 최종 색상·폰트·레이아웃·브랜드 스타일을 임의로 확정하지 않는다. 기능 확인을 위한 최소 UI가 필요하면 임시 화면임을 설명한다.
 - Figma 디자인을 받을 때 화면 구조, 여백, 타이포그래피, 색상, 컴포넌트 상태를 확인한다. 자료가 없거나 의도가 불분명하면 사용자에게 질문한다.
