@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Button from "@/components/Button";
 import InfoRow from "@/components/InfoRow";
 import Input from "@/components/Input";
@@ -8,19 +8,23 @@ import Label from "@/components/Label";
 import RadioOption from "@/components/RadioOption";
 import Stepper from "@/components/Stepper";
 import SuccessIcon from "@/components/SuccessIcon";
+import { submitRsvp } from "@/lib/actions";
 
 // Figma RSVPCard (2168:1029): /i/[id]의 참석 신청 카드
-// 제출 전 form, 제출 후 같은 자리에서 done 상태로 바뀐다.
-// 아직 Supabase가 연결되지 않아 응답은 저장되지 않고 화면만 바뀐다.
+// 제출 전 form, Supabase에 저장되면 같은 자리에서 done 상태로 바뀐다.
+// 저장 중·실패 표시는 디자인이 없어 임시로 최소한만 보여준다.
 type Status = "yes" | "no";
 
-export default function RSVPCard() {
+export default function RSVPCard({ invitationId }: { invitationId: string }) {
   const [name, setName] = useState("");
   const [status, setStatus] = useState<Status | null>(null);
   const [companions, setCompanions] = useState(0);
   const [isDone, setIsDone] = useState(false);
+  const [error, setError] = useState("");
+  // isPending: 저장 요청을 보내고 결과를 기다리는 중이면 true
+  const [isPending, startTransition] = useTransition();
 
-  const canSubmit = name.trim() !== "" && status !== null;
+  const canSubmit = name.trim() !== "" && status !== null && !isPending;
 
   if (isDone) {
     return (
@@ -47,9 +51,17 @@ export default function RSVPCard() {
       onSubmit={(event) => {
         event.preventDefault();
         if (!canSubmit) return;
-        // 불참이면 동반 인원은 0명으로 본다.
-        if (status === "no") setCompanions(0);
-        setIsDone(true);
+        setError("");
+        startTransition(async () => {
+          const result = await submitRsvp({ invitationId, name, status, companions });
+          if (!result.ok) {
+            setError(result.message);
+            return;
+          }
+          // 불참이면 동반 인원은 0명으로 본다. (서버도 0명으로 저장한다)
+          if (status === "no") setCompanions(0);
+          setIsDone(true);
+        });
       }}
     >
       <div className="flex flex-col items-center gap-inline-compact text-center">
@@ -103,8 +115,14 @@ export default function RSVPCard() {
         </div>
       </div>
 
+      {error && (
+        <p role="alert" className="text-center text-caption-md text-feedback-error">
+          {error}
+        </p>
+      )}
+
       <Button type="submit" size="lg" className="w-full" disabled={!canSubmit}>
-        참석 여부 보내기
+        {isPending ? "보내는 중…" : "참석 여부 보내기"}
       </Button>
     </form>
   );

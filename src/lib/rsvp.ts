@@ -1,4 +1,4 @@
-import type { Rsvp } from "@/lib/mock";
+import type { Rsvp } from "@/lib/data";
 
 // 응답 현황 집계
 // - 참석·불참 수: 각 상태로 응답한 사람 수

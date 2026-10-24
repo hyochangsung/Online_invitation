@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Button from "@/components/Button";
 import CopyLinkField from "@/components/CopyLinkField";
 import Input from "@/components/Input";
@@ -10,32 +10,45 @@ import Label from "@/components/Label";
 import NavBar from "@/components/NavBar";
 import SuccessIcon from "@/components/SuccessIcon";
 import Textarea from "@/components/Textarea";
+import { createInvitation } from "@/lib/actions";
+import { formatDate, kstDateToIso } from "@/lib/format";
 
 // Figma /create (2168:886) · 발행 완료 (2168:910)
-// 입력한 값을 미리보기에 그대로 보여주고, 발행하면 같은 화면이 발행 완료 상태로 바뀐다.
-// ⚠️ 아직 Supabase가 연결되지 않아 입력한 내용은 저장되지 않는다.
-//    발행 링크는 화면 흐름 확인용으로 가짜 초대장(demo)을 가리킨다.
-const DEMO_INVITATION_ID = "demo";
-
+// 입력한 값을 미리보기에 그대로 보여주고, 발행하면 Supabase에 저장한 뒤
+// 같은 화면이 발행 완료 상태로 바뀐다.
+// 저장 중·실패 표시는 디자인이 없어 임시로 최소한만 보여준다.
 export default function CreateForm() {
   const router = useRouter();
   const [title, setTitle] = useState("");
+  // 날짜 선택 칸 값. 예: "2026-11-14"
   const [date, setDate] = useState("");
   const [place, setPlace] = useState("");
   const [body, setBody] = useState("");
-  // 발행하면 링크 주소(사이트 주소 포함)를 담는다. 발행 전에는 null이다.
-  const [links, setLinks] = useState<{ invitation: string; responses: string } | null>(null);
+  // 발행하면 링크 경로와 주소(사이트 주소 포함)를 담는다. 발행 전에는 null이다.
+  const [links, setLinks] = useState<{ path: string; invitation: string; responses: string } | null>(null);
+  const [error, setError] = useState("");
+  // isPending: 저장 요청을 보내고 결과를 기다리는 중이면 true
+  const [isPending, startTransition] = useTransition();
 
-  const canPublish = [title, date, place, body].every((value) => value.trim() !== "");
+  const canPublish = [title, date, place, body].every((value) => value.trim() !== "") && !isPending;
 
   function publish() {
     if (!canPublish) return;
-    const invitationPath = `/i/${DEMO_INVITATION_ID}`;
-    setLinks({
-      invitation: `${window.location.origin}${invitationPath}`,
-      responses: `${window.location.origin}${invitationPath}/responses`,
+    setError("");
+    startTransition(async () => {
+      const result = await createInvitation({ title, date, place, body });
+      if (!result.ok) {
+        setError(result.message);
+        return;
+      }
+      const invitationPath = `/i/${result.data.id}`;
+      setLinks({
+        path: invitationPath,
+        invitation: `${window.location.origin}${invitationPath}`,
+        responses: `${window.location.origin}${invitationPath}/responses`,
+      });
+      window.scrollTo(0, 0);
     });
-    window.scrollTo(0, 0);
   }
 
   if (links) {
@@ -61,7 +74,7 @@ export default function CreateForm() {
           <Button
             size="lg"
             className="w-full"
-            onClick={() => router.push(`/i/${DEMO_INVITATION_ID}`)}
+            onClick={() => router.push(links.path)}
           >
             내 초대장 보기
           </Button>
@@ -94,10 +107,10 @@ export default function CreateForm() {
           <Input
             id="date"
             label="일시"
+            type="date"
             required
             value={date}
             onChange={(event) => setDate(event.target.value)}
-            placeholder="예) 2026년 11월 14일 (토) 09:00"
           />
           <Input
             id="place"
@@ -121,7 +134,12 @@ export default function CreateForm() {
           <Label id="preview-label">미리보기</Label>
           {/* 미리보기는 정해진 높이 안에서 스크롤된다. */}
           <div className="h-460 overflow-y-auto rounded-control border border-border-subtle">
-            <Invitation title={title} date={date} place={place} body={body} />
+            <Invitation
+              title={title}
+              date={date ? formatDate(kstDateToIso(date)) : ""}
+              place={place}
+              body={body}
+            />
           </div>
           <p className="text-caption-md text-text-tertiary">
             입력하는 내용이 바로 미리보기에 반영돼요.
@@ -130,9 +148,14 @@ export default function CreateForm() {
       </main>
 
       {/* 발행하기 버튼은 화면 하단에 고정한다. */}
-      <div className="fixed inset-x-0 bottom-0 mx-auto w-full max-w-375 bg-surface-default p-page-horizontal">
+      <div className="fixed inset-x-0 bottom-0 mx-auto flex w-full max-w-375 flex-col gap-inline-md bg-surface-default p-page-horizontal">
+        {error && (
+          <p role="alert" className="text-center text-caption-md text-feedback-error">
+            {error}
+          </p>
+        )}
         <Button size="lg" className="w-full" disabled={!canPublish} onClick={publish}>
-          발행하기
+          {isPending ? "발행하는 중…" : "발행하기"}
         </Button>
       </div>
     </div>

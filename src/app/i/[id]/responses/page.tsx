@@ -5,8 +5,8 @@ import NavBar from "@/components/NavBar";
 import ResponseRow from "@/components/ResponseRow";
 import SectionHeader from "@/components/SectionHeader";
 import StatCard from "@/components/StatCard";
-import { formatDateTime, formatShortDateTime } from "@/lib/format";
-import { findMockInvitation, mockRsvps } from "@/lib/mock";
+import { formatDate, formatShortDateTime } from "@/lib/format";
+import { getInvitation, getRsvps } from "@/lib/data";
 import { summarizeRsvps } from "@/lib/rsvp";
 import CopyInviteButton from "./CopyInviteButton";
 
@@ -15,20 +15,19 @@ export const metadata: Metadata = {
 };
 
 // Figma /i/[id]/responses (2168:871): 호스트가 보는 응답 현황
-// 아직 Supabase가 연결되지 않아 src/lib/mock.ts의 가짜 응답을 보여준다.
-// ⚠️ 임시로 접근 제한이 없다. 실제 데이터를 연결할 때는 반드시
+// Supabase에서 초대장과 응답을 읽어 보여준다.
+// ⚠️ 임시로 접근 제한이 없다. 실제 서비스 전에는 반드시
 //    서버에서 호스트 비밀 관리 링크를 검증한 뒤에만 응답을 보여줘야 한다.
+//    (Supabase의 "누구나 응답 읽기 (임시)" RLS 정책도 함께 지운다.)
 export default async function ResponsesPage({ params }: PageProps<"/i/[id]/responses">) {
   const { id } = await params;
-  const invitation = findMockInvitation(id);
+  const invitation = await getInvitation(id);
 
   if (!invitation) {
     notFound();
   }
 
-  const rsvps = mockRsvps
-    .filter((rsvp) => rsvp.invitationId === id)
-    .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  const rsvps = await getRsvps(invitation.id);
   const { attending, notAttending, headcount } = summarizeRsvps(rsvps);
 
   return (
@@ -39,7 +38,7 @@ export default async function ResponsesPage({ params }: PageProps<"/i/[id]/respo
         <SectionHeader
           subtitle="Responses"
           title={invitation.title}
-          description={`${formatDateTime(invitation.startsAt)} · ${invitation.place}`}
+          description={`${formatDate(invitation.startsAt)} · ${invitation.place}`}
         />
 
         <div className="flex gap-inline-md">
